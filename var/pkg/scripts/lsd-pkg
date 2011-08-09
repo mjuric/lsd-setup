@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# Find our location
+# Try #1 (if we were called from var/pkg/scripts)
+DEST="$(dirname $0)/../../.."
+DEST="$(cd $DEST && pwd)"
+if [ ! -f "$DEST/.lsdpkgroot" ]; then
+	# Try #2 (if we were called from bin)
+	DEST="$(dirname $0)/.."
+	DEST="$(cd $DEST && pwd)"
+	if [ ! -f "$DEST/.lsdpkgroot" ]; then
+		echo "Could not deduce the root of LSD package installation; your setup is likely corrupted."
+		exit -1
+	fi
+fi
+
+cd $DEST
+
+if [ ! -f "$DEST/var/pkg/etc/remote" ]; then
+	echo "Could not load the remote package repository URL ($DEST/var/pkg/etc/remote)."
+	exit -1
+fi
+export REMOTE=`head -1 "$DEST/var/pkg/etc/remote"`
+
+download ()
+{
+	# Download
+	(cd var/pkg/sources && make -f ../scripts/Makefile all DOWNLOAD=1) || exit -1
+}
+
+build ()
+{
+	# Build
+	(cd var/pkg/installed && make -f ../scripts/Makefile all) || { echo "Error while building LSD packages. More details in $DEST/var/pkg/log directory."; exit -1; }
+	(cd var/pkg/installed && make -f ../scripts/Makefile gc) || { echo "Error while building LSD packages. More details in $DEST/var/pkg/log directory."; exit -1; }
+	cat <<EOF
+Congratulations, you have successfully built LSD. Source the following shell
+scripts:
+
+	source $DEST/environment.sh
+	source $DEST/lsd_environment.sh
+
+to set up the paths (and in that order). Having done that, run:
+
+	lsd-query --version
+
+to verify everything went well.
+EOF
+}
+
+rebuild()
+{
+	(cd var/pkg/sources && make -f ../scripts/Makefile clean)
+	build
+}
+
+purge()
+{
+	make -f var/pkg/scripts/Makefile purge
+	cat <<EOF
+All packages installed in
+	$DEST
+have been wiped out.
+EOF
+}
+
+update()
+{
+	# Download the (potentially updated) packaging files
+	wget -c -q -P $DEST/var/pkg/scripts "$REMOTE/scripts/Makefile" && \
+	wget -c -q -P $DEST/var/pkg/scripts "$REMOTE/scripts/lsd-pkg" && \
+	chmod +x "$DEST/var/pkg/scripts/lsd-pkg" || { echo "Failed to download packaging scripts."; exit -1; }
+	
+	# download and build
+	download
+	build
+}
+
+usage ()
+{
+	echo "Usage: $0 <download|build|update|rebuild|purge>"
+	exit -1
+}
+
+if [ x"$1" == x"download" ]; then
+	download
+elif [ x"$1" == x"build" ]; then
+	build
+elif [ x"$1" == x"update" ]; then
+	update
+elif [ x"$1" == x"rebuild" ]; then
+	rebuild
+elif [ x"$1" == x"purge" ]; then
+	purge
+else
+	usage
+fi
