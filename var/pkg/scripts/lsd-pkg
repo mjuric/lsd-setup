@@ -25,15 +25,19 @@ export REMOTE=`head -1 "$DEST/var/pkg/etc/remote"`
 download ()
 {
 	# Download
-	(cd var/pkg/sources && make -f ../scripts/Makefile all DOWNLOAD=1) || exit -1
+	TARGET=${1:-dlall}
+	(cd var/pkg/sources && make -f ../scripts/Makefile $TARGET DOWNLOAD=1) || exit -1
 }
 
 build ()
 {
 	# Build
-	(cd var/pkg/installed && make -f ../scripts/Makefile all) || { echo "Error while building LSD packages. More details in $DEST/var/pkg/log directory."; exit -1; }
+	TARGET=${1:-all}
+	(cd var/pkg/installed && make -f ../scripts/Makefile $TARGET) || { echo "Error while building LSD packages. More details in $DEST/var/pkg/log directory."; exit -1; }
 	(cd var/pkg/installed && make -f ../scripts/Makefile gc) || { echo "Error while building LSD packages. More details in $DEST/var/pkg/log directory."; exit -1; }
-	cat <<EOF
+	
+	if [ $TARGET == "all" ]; then
+		cat <<EOF
 Congratulations, you have successfully built LSD. Source the following shell
 scripts:
 
@@ -46,52 +50,55 @@ to set up the paths (and in that order). Having done that, run:
 
 to verify everything went well.
 EOF
+	fi
 }
 
 rebuild()
 {
-	(cd var/pkg/sources && make -f ../scripts/Makefile clean)
-	build
-}
+	if [ "x$1" == "x" ]; then
+		echo "Specify the target to rebuild. Use 'all' to rebuild everything."
+		exit -1
+	fi
 
-purge()
-{
-	make -f var/pkg/scripts/Makefile purge
-	cat <<EOF
-All packages installed in
-	$DEST
-have been wiped out.
-EOF
+	TARGET=$1
+	if [ x"$TARGET" == x"all" ]; then
+		(cd var/pkg/sources && make -f ../scripts/Makefile clean)
+	else
+		rm -f "var/pkg/installed/$TARGET"
+	fi
+
+	build $TARGET
 }
 
 update()
 {
 	# Download the (potentially updated) packaging files
-	wget -c -q -P $DEST/var/pkg/scripts "$REMOTE/scripts/Makefile" && \
-	wget -c -q -P $DEST/var/pkg/scripts "$REMOTE/scripts/lsd-pkg" && \
-	chmod +x "$DEST/var/pkg/scripts/lsd-pkg" || { echo "Failed to download packaging scripts."; exit -1; }
+	TARGET=${1:-all}
+	( cd $DEST/var/pkg/scripts &&
+		wget -q "$REMOTE/scripts/Makefile" -O tmp && mv tmp Makefile && \
+		wget -q "$REMOTE/scripts/lsd-pkg"  -O tmp && mv tmp lsd-pkg && \
+		chmod +x lsd-pkg \
+	) || { echo "Failed to download packaging scripts."; exit -1; }
 	
 	# download and build
-	download
-	build
+	download $TARGET
+	build $TARGET
 }
 
 usage ()
 {
-	echo "Usage: $0 <download|build|update|rebuild|purge>"
+	echo "Usage: $0 <download|build|update|rebuild>"
 	exit -1
 }
 
 if [ x"$1" == x"download" ]; then
-	download
+	download $2
 elif [ x"$1" == x"build" ]; then
-	build
+	build $2
 elif [ x"$1" == x"update" ]; then
-	update
+	update $2
 elif [ x"$1" == x"rebuild" ]; then
-	rebuild
-elif [ x"$1" == x"purge" ]; then
-	purge
+	rebuild $2
 else
 	usage
 fi

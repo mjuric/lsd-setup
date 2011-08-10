@@ -14,17 +14,26 @@ MODULES:=$(DEST)/usr/local
 
 NCPU:=$(shell cat /proc/cpuinfo  | grep processor | wc |  awk '{print $$1}')
 
-all: lsd matplotlib
-	@echo "Everything up to date."
+#
+# Dirty test if prerequisites for WX exist
+# Note: needs more testing, may not detect when gtk2 is present but gtk2-devel isn't
+#
+NO_WX=$(shell (which pkg-config > /dev/null 2>&1 && pkg-config gtk+-2.0) && echo "1" || echo "0")
+
+all: lsd
+	@echo ...
+
+dlall: lsd matplotlib
+	@echo ...
 
 #
 # List of all python packages that can be installed
 #
 
-PY_PACKAGES:=Cython-0.15 tables-2.2.1 ipython-0.10.2 numexpr-1.4.2 \
+PY_PACKAGES:=Cython-0.15 ipython-0.10.2 numexpr-1.4.2 \
              pyfits-2.4.0 PyYAML-3.10 pycurl-7.19.0 urlgrabber-3.9.1 Polygon-2.0.2-mjuric-3 \
              pywcs-1.10-4.7 matplotlib-1.0.1-mjuric scottransom-pyslalib-97cfc40
-PY_SPECIAL_PKGS:=scipy-0.9.0 numpy-1.6.1 distribute-0.6.19 scikits.ann-0.2.dev-r803-mjuric-3 lsd-0.5.4-24-g56e34c50
+PY_SPECIAL_PKGS:=scipy-0.9.0 numpy-1.6.1 distribute-0.6.19 tables-2.2.1 scikits.ann-0.2.dev-r803-mjuric-3 lsd-0.5.4-24-g56e34c50
 
 #
 # Create package tree
@@ -62,6 +71,10 @@ gc:
 #
 # Software dependencies
 #
+ifndef NO_WX
+WXPYTHON=wxPython-src-2.8.12.1
+endif
+
 lsd-0.5.4-24-g56e34c50: git-1.7.6 tables-2.2.1 pyfits-2.4.0 PyYAML-3.10 \
         numpy-1.6.1 urlgrabber-3.9.1 Polygon-2.0.2-mjuric-3 \
         scikits.ann-0.2.dev-r803-mjuric-3 scottransom-pyslalib-97cfc40 pywcs-1.10-4.7
@@ -76,10 +89,12 @@ urlgrabber-3.9.1: pycurl-7.19.0 Python-2.7.2
 Polygon-2.0.2-mjuric-3: numpy-1.6.1 Python-2.7.2
 scikits.ann-0.2.dev-r803-mjuric-3: ann_1.1.2-mjuric Python-2.7.2 distribute-0.6.19
 pywcs-1.10-4.7: numpy-1.6.1
+ifndef NO_WX
 wxPython-src-2.8.12.1: freetype-2.4.6 Python-2.7.2
+endif
 scipy-0.9.0: lapack-3.3.1-mjuric numpy-1.6.1
 numpy-1.6.1: lapack-3.3.1-mjuric Python-2.7.2
-matplotlib-1.0.1-mjuric: scipy-0.9.0 wxPython-src-2.8.12.1
+matplotlib-1.0.1-mjuric: scipy-0.9.0 $(WXPYTHON)
 curl-7.21.7: libssh2-1.2.8
 ann_1.1.2-mjuric: swig-2.0.4
 swig-2.0.4: pcre-8.12
@@ -98,9 +113,10 @@ ifdef DOWNLOAD
 ../sources/%.tar.bz2:
 	@echo -n "Downloading $@ ... " 1>&2
 	@wget -q -c $(REMOTE)/repo/`basename $@` -O $@.tmp && mv $@.tmp $@
+	@ echo "$@ OK." 1>&2
 
 % : ../sources/%.tar.bz2
-	@ echo "$@ OK." 1>&2
+	@
 
 else
 
@@ -162,6 +178,7 @@ ann_1.1.2-mjuric:
 	$(CMD_MAKE) linux-g++ && cp lib/* $(DEST)/lib && cp -r include/ANN $(DEST)/include \
 	$(CMD_LOG)
 
+ifndef NO_WX
 wxPython-src-2.8.12.1:
 	$(CMD_PREP) \
 	mkdir bld && cd bld && $(ENV) ../configure --prefix=$(DEST) --with-gtk --enable-unicode --with-gnomeprint --enable-geometry --enable-display --enable-sound && \
@@ -175,6 +192,7 @@ wxPython-src-2.8.12.1:
 	cd wxPython && \
 	$(CMD_PY_INSTALL) BUILD_GLCANVAS=0 --home=$(MODULES)\
 	$(CMD_LOG)
+endif
 
 $(PY_PACKAGES):
 	$(CMD_PREP) \
@@ -191,9 +209,14 @@ distribute-0.6.19:
 	DONT_PATCH_SETUPTOOLS=1 $(CMD_PY_INSTALL) \
 	$(CMD_LOG)
 
+tables-2.2.1:
+	$(CMD_PREP) \
+	$(CMD_PY_INSTALL) --hdf5=$(DEST) --lzo=$(DEST) --bzip2=$(DEST) \
+	$(CMD_LOG)
+
 scikits.ann-0.2.dev-r803-mjuric-3:
 	$(CMD_PREP) \
-	ANN_LIB=$(DIST)/lib ANN_INCLUDE=$(DIST)/include $(CMD_PY_INSTALL) \
+	ANN_LIB=$(DEST)/lib ANN_INCLUDE=$(DEST)/include $(CMD_PY_INSTALL) \
 	$(CMD_LOG)
 
 lsd-0.5.4-24-g56e34c50:

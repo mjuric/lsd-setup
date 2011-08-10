@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#REMOTE="http://faun.rc.fas.harvard.edu/mjuric/lsd-setup/"
-#DEFAULT_DEST=/n/pan/mjuric/xxx
-REMOTE="http://localhost/lsd-setup/var/pkg"
+REMOTE="http://faun.rc.fas.harvard.edu/mjuric/lsd-setup/"
 DEFAULT_DEST=/home/mjuric/xxx
+#REMOTE="http://localhost/lsd-setup/var/pkg"
+#DEFAULT_DEST=/home/mjuric/xxx
 
 # Create destination directory
 cat <<EOF
@@ -28,6 +28,7 @@ read -e DEST
 if [ "x$DEST" == "x" ]; then
 	DEST="$DEFAULT_DEST"
 fi
+echo
 
 # Pull down the 'pkg' tree
 mkdir -p $DEST $DEST/var/pkg/scripts && touch $DEST/.pkgroot || exit $?
@@ -49,5 +50,11 @@ Congratulations, you have successfully downloaded LSD. Now run:
 
 	$DEST/bin/lsd-pkg build
 
-to build it.
+to build it. This will build everything needed to run LSD.
+
+If you have GTK+2 toolkit development files installed, you may also want to
+build matplotlib, a plotting library for python:
+
+	$DEST/bin/lsd-pkg build matplotlib
+
 EOF
