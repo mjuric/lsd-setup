@@ -77,7 +77,8 @@ endif
 
 lsd-0.5.4-24-g56e34c50: git-1.7.6 tables-2.2.1 pyfits-2.4.0 PyYAML-3.10 \
         numpy-1.6.1 urlgrabber-3.9.1 Polygon-2.0.2-mjuric-3 \
-        scikits.ann-0.2.dev-r803-mjuric-3 scottransom-pyslalib-97cfc40 pywcs-1.10-4.7
+        scikits.ann-0.2.dev-r803-mjuric-3 scottransom-pyslalib-97cfc40 pywcs-1.10-4.7 \
+        scipy-0.9.0
 Python-2.7.2: bzip2-1.0.6 readline-6.2 ncurses-5.9 gdbm-1.8.3 sqlite-autoconf-3070701 lzo-2.05
 distribute-0.6.19 ipython-0.10.2 numpy-1.6.1 numexpr-1.4.2: Python-2.7.2
 Cython-0.15: numpy-1.6.1 Python-2.7.2
@@ -111,9 +112,9 @@ ifdef DOWNLOAD
 .PRECIOUS: ../sources/%.tar.bz2
 
 ../sources/%.tar.bz2:
-	@echo -n "Downloading $@ ... " 1>&2
+	@echo -n "Downloading $(shell basename $@ .tar.bz2) ... " 1>&2
 	@wget -q -c $(REMOTE)/repo/`basename $@` -O $@.tmp && mv $@.tmp $@
-	@ echo "$@ OK." 1>&2
+	@ echo "OK." 1>&2
 
 % : ../sources/%.tar.bz2
 	@
