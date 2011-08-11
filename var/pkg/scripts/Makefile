@@ -14,15 +14,10 @@ MODULES:=$(DEST)/usr/local
 
 NCPU:=$(shell cat /proc/cpuinfo  | grep processor | wc |  awk '{print $$1}')
 
-#
-# Test if GTK2 (a prerequisite for wxWidgets) exists
-#
-HAVE_GTK2=$(shell (which pkg-config > /dev/null 2>&1 && pkg-config gtk+-2.0) && echo "1" || echo "0")
-
-all: lsd
+all: lsd matplotlib
 	@echo ...
 
-dlall: lsd matplotlib wxPython-src-2.8.12.1
+dlall: lsd matplotlib
 	@echo ...
 
 #
@@ -85,18 +80,12 @@ urlgrabber-3.9.1: pycurl-7.19.0 Python-2.7.2
 Polygon-2.0.2-mjuric-3: numpy-1.6.1 Python-2.7.2
 scikits.ann-0.2.dev-r803-mjuric-3: ann_1.1.2-mjuric Python-2.7.2 distribute-0.6.19
 pywcs-1.10-4.7: numpy-1.6.1
-wxPython-src-2.8.12.1: Python-2.7.2
 scipy-0.9.0: lapack-3.3.1-mjuric numpy-1.6.1
 numpy-1.6.1: lapack-3.3.1-mjuric Python-2.7.2
 curl-7.21.7: libssh2-1.2.8
 ann_1.1.2-mjuric: swig-2.0.4
 swig-2.0.4: pcre-8.12
-
-# Don't make wxPython a prerequisite for matplotlib unless it will be built
-ifeq ($(HAVE_GTK2),1)
-WXPYTHON=wxPython-src-2.8.12.1
-endif
-matplotlib-1.0.1-mjuric: scipy-0.9.0 freetype-2.4.6 $(WXPYTHON)
+matplotlib-1.0.1-mjuric: scipy-0.9.0 freetype-2.4.6
 
 ENV:=env -u PYTHONHOME PATH=$(MODULES)/bin:$(DEST)/bin:$$PATH LD_LIBRARY_PATH=$(DEST)/lib:$$LD_LIBRARY_PATH PYTHONPATH=$(MODULES)/lib/python
 CMD_MAKE=$(ENV) $(MAKE)
@@ -176,23 +165,6 @@ ann_1.1.2-mjuric:
 	$(CMD_PREP) \
 	$(CMD_MAKE) linux-g++ && cp lib/* $(DEST)/lib && cp -r include/ANN $(DEST)/include \
 	$(CMD_LOG)
-
-# Don't build wxPython if we don't have the prerequisites
-ifeq ($(HAVE_GTK2),1)
-wxPython-src-2.8.12.1:
-	$(CMD_PREP) \
-	mkdir bld && cd bld && $(ENV) ../configure --prefix=$(DEST) --with-gtk --enable-unicode --with-gnomeprint --enable-geometry --enable-display --enable-sound && \
-	$(CMD_MAKE) -j$(NCPU) && \
-	$(CMD_MAKE) install && \
-	$(CMD_MAKE) -j$(NCPU) -C contrib/src/stc && \
-	$(CMD_MAKE) -C contrib/src/stc install && \
-	$(CMD_MAKE) -j$(NCPU) -C contrib/src/gizmos && \
-	$(CMD_MAKE) -C contrib/src/gizmos install && \
-	cd .. && \
-	cd wxPython && \
-	$(CMD_PY_INSTALL) BUILD_GLCANVAS=0 --home=$(MODULES)\
-	$(CMD_LOG)
-endif
 
 $(PY_PACKAGES):
 	$(CMD_PREP) \

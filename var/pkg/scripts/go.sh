@@ -47,7 +47,7 @@ echo "All source packages downloaded."
 echo
 
 # Ask to build lsd
-echo -n "Should I go ahead and build LSD and its prerequisites ([yes]/no)? "
+echo -n "Should I go ahead and build everything ([yes]/no)? "
 read -e ANS
 if [ "x$ANS" == x"yes" -o "x$ANS" == x"y" -o "x$ANS" == x"" ]; then
 	$DEST/bin/lsd-pkg build || exit $?
@@ -61,23 +61,5 @@ build it at this time. When you're ready to build it, run:
 	$DEST/bin/lsd-pkg build
 
 to build it. This will build everything needed to run LSD.
-EOF
-fi
-
-# Ask to build matplotlib
-echo -n "Should I build matplotlib, the plotting package for Python ([yes]/no)? "
-read -e ANS
-if [ "x$ANS" == x"yes" -o "x$ANS" == x"y" -o "x$ANS" == x"" ]; then
-	$DEST/bin/lsd-pkg build matplotlib || exit $?
-	echo "matplotlib built successfully."
-else
-cat << EOF
-You have chosen not to build matplotlib at this time. If you change your mind,
-you can always build it with:
-
-	$DEST/bin/lsd-pkg build matplotlib
-
-Note that unless you have GTK+2 toolkit header files, you won't be able to
-use matplotlib's interactive plotting mode.
 EOF
 fi
