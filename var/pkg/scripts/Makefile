@@ -5,7 +5,7 @@
 # `make' must be invoked from var/pkg/installed (for build/update)
 # or var/pkg/sources (for download)
 #
-LSDPKG=lsd-0.5.4-28-ga1fe611b
+LSDPKG=lsd-0.5.5
 
 DEST := $(shell cd ../../.. && pwd)
 PKG:=$(DEST)/var/pkg
