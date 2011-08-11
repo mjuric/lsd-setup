@@ -196,7 +196,7 @@ scikits.ann-0.2.dev-r803-mjuric-3:
 $(LSDPKG):
 	$(CMD_PREP) \
 	$(CMD_PYTHON) setup.py install --home=$(DEST)/opt/lsd/$@ && \
-	 (cd $(DEST)/opt/lsd && ln -sf "$@" current) && \
+	 (cd $(DEST)/opt/lsd && rm -f current && ln -sf "$@" current) && \
 	 echo -e 'export PATH=$(DEST)/opt/lsd/$@/bin:$$PATH\nexport LD_LIBRARY_PATH=$(DEST)/opt/lsd/$@/lib:$$LD_LIBRARY_PATH\nexport PYTHONPATH=$(DEST)/opt/lsd/$@/lib/python:$$PYTHONPATH' > $(DEST)/opt/lsd/$@/lsd_environment.sh && \
 	 rm -f $(DEST)/lsd_environment.sh && \
 	 echo -e 'export PATH=$(DEST)/opt/lsd/current/bin:$$PATH\nexport LD_LIBRARY_PATH=$(DEST)/opt/lsd/current/lib:$$LD_LIBRARY_PATH\nexport PYTHONPATH=$(DEST)/opt/lsd/current/lib/python:$$PYTHONPATH' > $(DEST)/lsd_environment.sh \
