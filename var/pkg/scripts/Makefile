@@ -15,15 +15,14 @@ MODULES:=$(DEST)/usr/local
 NCPU:=$(shell cat /proc/cpuinfo  | grep processor | wc |  awk '{print $$1}')
 
 #
-# Dirty test if prerequisites for WX exist
-# Note: needs more testing, may not detect when gtk2 is present but gtk2-devel isn't
+# Test if GTK2 (a prerequisite for wxWidgets) exists
 #
-NO_WX=$(shell (which pkg-config > /dev/null 2>&1 && pkg-config gtk+-2.0) && echo "1" || echo "0")
+HAVE_GTK2=$(shell (which pkg-config > /dev/null 2>&1 && pkg-config gtk+-2.0) && echo "1" || echo "0")
 
 all: lsd
 	@echo ...
 
-dlall: lsd matplotlib
+dlall: lsd matplotlib wxPython-src-2.8.12.1
 	@echo ...
 
 #
@@ -71,10 +70,6 @@ gc:
 #
 # Software dependencies
 #
-ifndef NO_WX
-WXPYTHON=wxPython-src-2.8.12.1
-endif
-
 lsd-0.5.4-24-g56e34c50: git-1.7.6 tables-2.2.1 pyfits-2.4.0 PyYAML-3.10 \
         numpy-1.6.1 urlgrabber-3.9.1 Polygon-2.0.2-mjuric-3 \
         scikits.ann-0.2.dev-r803-mjuric-3 scottransom-pyslalib-97cfc40 pywcs-1.10-4.7 \
@@ -90,15 +85,18 @@ urlgrabber-3.9.1: pycurl-7.19.0 Python-2.7.2
 Polygon-2.0.2-mjuric-3: numpy-1.6.1 Python-2.7.2
 scikits.ann-0.2.dev-r803-mjuric-3: ann_1.1.2-mjuric Python-2.7.2 distribute-0.6.19
 pywcs-1.10-4.7: numpy-1.6.1
-ifndef NO_WX
-wxPython-src-2.8.12.1: freetype-2.4.6 Python-2.7.2
-endif
+wxPython-src-2.8.12.1: Python-2.7.2
 scipy-0.9.0: lapack-3.3.1-mjuric numpy-1.6.1
 numpy-1.6.1: lapack-3.3.1-mjuric Python-2.7.2
-matplotlib-1.0.1-mjuric: scipy-0.9.0 $(WXPYTHON)
 curl-7.21.7: libssh2-1.2.8
 ann_1.1.2-mjuric: swig-2.0.4
 swig-2.0.4: pcre-8.12
+
+# Don't make wxPython a prerequisite for matplotlib unless it will be built
+ifeq ($(HAVE_GTK2),1)
+WXPYTHON=wxPython-src-2.8.12.1
+endif
+matplotlib-1.0.1-mjuric: scipy-0.9.0 freetype-2.4.6 $(WXPYTHON)
 
 ENV:=env -u PYTHONHOME PATH=$(MODULES)/bin:$(DEST)/bin:$$PATH LD_LIBRARY_PATH=$(DEST)/lib:$$LD_LIBRARY_PATH PYTHONPATH=$(MODULES)/lib/python
 CMD_MAKE=$(ENV) $(MAKE)
@@ -179,7 +177,8 @@ ann_1.1.2-mjuric:
 	$(CMD_MAKE) linux-g++ && cp lib/* $(DEST)/lib && cp -r include/ANN $(DEST)/include \
 	$(CMD_LOG)
 
-ifndef NO_WX
+# Don't build wxPython if we don't have the prerequisites
+ifeq ($(HAVE_GTK2),1)
 wxPython-src-2.8.12.1:
 	$(CMD_PREP) \
 	mkdir bld && cd bld && $(ENV) ../configure --prefix=$(DEST) --with-gtk --enable-unicode --with-gnomeprint --enable-geometry --enable-display --enable-sound && \

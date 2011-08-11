@@ -31,10 +31,10 @@ fi
 echo
 
 # Pull down the 'pkg' tree
-mkdir -p $DEST $DEST/var/pkg/scripts && touch $DEST/.pkgroot || exit $?
+mkdir -p $DEST $DEST/var/pkg/scripts || exit $?
 
-wget -q -P $DEST/var/pkg/scripts "$REMOTE/scripts/Makefile" && \
-wget -q -P $DEST/var/pkg/scripts "$REMOTE/scripts/lsd-pkg" && \
+wget -N -q -P $DEST/var/pkg/scripts "$REMOTE/scripts/Makefile" && \
+wget -N -q -P $DEST/var/pkg/scripts "$REMOTE/scripts/lsd-pkg" && \
 chmod +x "$DEST/var/pkg/scripts/lsd-pkg" || { echo "Failed to download packaging scripts."; exit -1; }
 
 # Initialize
@@ -51,7 +51,8 @@ echo -n "Should I go ahead and build LSD and its prerequisites ([yes]/no)? "
 read -e ANS
 if [ "x$ANS" == x"yes" -o "x$ANS" == x"y" -o "x$ANS" == x"" ]; then
 	$DEST/bin/lsd-pkg build || exit $?
-else:
+	echo
+else
 cat << EOF
 
 Congratulations, you have successfully downloaded LSD, but chosen not to
@@ -64,11 +65,12 @@ EOF
 fi
 
 # Ask to build matplotlib
-echo -n "Should I go ahead and build matplotlib, the plotting package for Python ([yes]/no)? "
+echo -n "Should I build matplotlib, the plotting package for Python ([yes]/no)? "
 read -e ANS
 if [ "x$ANS" == x"yes" -o "x$ANS" == x"y" -o "x$ANS" == x"" ]; then
 	$DEST/bin/lsd-pkg build matplotlib || exit $?
-else:
+	echo "matplotlib built successfully."
+else
 cat << EOF
 You have chosen not to build matplotlib at this time. If you change your mind,
 you can always build it with:
