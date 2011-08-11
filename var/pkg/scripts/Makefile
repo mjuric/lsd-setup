@@ -5,6 +5,8 @@
 # `make' must be invoked from var/pkg/installed (for build/update)
 # or var/pkg/sources (for download)
 #
+LSDPKG=lsd-0.5.4-28-ga1fe611b
+
 DEST := $(shell cd ../../.. && pwd)
 PKG:=$(DEST)/var/pkg
 BUILD:=$(PKG)/build
@@ -27,7 +29,7 @@ dlall: lsd matplotlib
 PY_PACKAGES:=Cython-0.15 ipython-0.10.2 numexpr-1.4.2 \
              pyfits-2.4.0 PyYAML-3.10 pycurl-7.19.0 urlgrabber-3.9.1 Polygon-2.0.2-mjuric-3 \
              pywcs-1.10-4.7 matplotlib-1.0.1-mjuric scottransom-pyslalib-97cfc40
-PY_SPECIAL_PKGS:=scipy-0.9.0 numpy-1.6.1 distribute-0.6.19 tables-2.2.1 scikits.ann-0.2.dev-r803-mjuric-3 lsd-0.5.4-24-g56e34c50
+PY_SPECIAL_PKGS:=scipy-0.9.0 numpy-1.6.1 distribute-0.6.19 tables-2.2.1 scikits.ann-0.2.dev-r803-mjuric-3 $(LSDPKG)
 
 #
 # Create package tree
@@ -43,7 +45,7 @@ tree:
 #
 # Top-level packages and aliases
 #
-lsd: lsd-0.5.4-24-g56e34c50 ipython-0.10.2
+lsd: $(LSDPKG) ipython-0.10.2
 	@
 matplotlib: ipython-0.10.2 matplotlib-1.0.1-mjuric
 	@
@@ -65,7 +67,7 @@ gc:
 #
 # Software dependencies
 #
-lsd-0.5.4-24-g56e34c50: git-1.7.6 tables-2.2.1 pyfits-2.4.0 PyYAML-3.10 \
+$(LSDPKG): git-1.7.6 tables-2.2.1 pyfits-2.4.0 PyYAML-3.10 \
         numpy-1.6.1 urlgrabber-3.9.1 Polygon-2.0.2-mjuric-3 \
         scikits.ann-0.2.dev-r803-mjuric-3 scottransom-pyslalib-97cfc40 pywcs-1.10-4.7 \
         scipy-0.9.0
@@ -191,12 +193,13 @@ scikits.ann-0.2.dev-r803-mjuric-3:
 	ANN_LIB=$(DEST)/lib ANN_INCLUDE=$(DEST)/include $(CMD_PY_INSTALL) \
 	$(CMD_LOG)
 
-lsd-0.5.4-24-g56e34c50:
+$(LSDPKG):
 	$(CMD_PREP) \
 	$(CMD_PYTHON) setup.py install --home=$(DEST)/opt/lsd/$@ && \
-	 echo -e 'export PATH=$(DEST)/opt/lsd/$@/bin:$$PATH\nexport LD_LIBRARY_PATH=$(DEST)/opt/lsd/$@/lib:$$LD_LIBRARY_PATH\nexport PYTHONPATH=$(DEST)/opt/lsd/$@/lib/python:$$PYTHONPATH' \
-	  > $(DEST)/opt/lsd/$@/lsd_environment.sh && \
-	  (cd $(DEST) && ln -sf "opt/lsd/$@/lsd_environment.sh" lsd_environment.sh) \
+	 (cd $(DEST)/opt/lsd && ln -sf "$@" current) && \
+	 echo -e 'export PATH=$(DEST)/opt/lsd/$@/bin:$$PATH\nexport LD_LIBRARY_PATH=$(DEST)/opt/lsd/$@/lib:$$LD_LIBRARY_PATH\nexport PYTHONPATH=$(DEST)/opt/lsd/$@/lib/python:$$PYTHONPATH' > $(DEST)/opt/lsd/$@/lsd_environment.sh && \
+	 rm -f $(DEST)/lsd_environment.sh && \
+	 echo -e 'export PATH=$(DEST)/opt/lsd/current/bin:$$PATH\nexport LD_LIBRARY_PATH=$(DEST)/opt/lsd/current/lib:$$LD_LIBRARY_PATH\nexport PYTHONPATH=$(DEST)/opt/lsd/current/lib/python:$$PYTHONPATH' > $(DEST)/lsd_environment.sh \
 	$(CMD_LOG)
 
 endif
