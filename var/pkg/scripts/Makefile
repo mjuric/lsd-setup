@@ -116,7 +116,7 @@ ifdef DOWNLOAD
 
 else
 
-zlib-1.2.5 git-1.7.6 readline-6.2 sqlite-autoconf-3070701 libssh2-1.2.8 freetype-2.4.6:
+zlib-1.2.5 git-1.7.6 readline-6.2 sqlite-autoconf-3070701 freetype-2.4.6:
 	$(CMD_PREP) $(CMD_CONF_MAKE_INSTALL) $(CMD_LOG)
 
 libpng-1.4.8:
@@ -162,7 +162,12 @@ lapack-3.3.1-mjuric:
 
 openssl-1.0.0d:
 	$(CMD_PREP) \
-	./config --prefix=$(DEST) shared threads && $(CMD_MAKE) && $(CMD_MAKE) install \
+	./config --prefix=$(DEST) --libdir=lib shared threads && $(CMD_MAKE) && $(CMD_MAKE) install \
+	$(CMD_LOG)
+
+libssh2-1.2.8:
+	$(CMD_PREP) \
+	./configure --prefix=$(DEST) --with-openssl=$(DEST) $(FLAGS) && $(CMD_MAKE) -j$(NCPU) && $(CMD_MAKE) install \
 	$(CMD_LOG)
 
 curl-7.21.7:
