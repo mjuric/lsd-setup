@@ -30,7 +30,7 @@ dlall: lsd matplotlib
 
 PY_PACKAGES:=Cython-0.15 ipython-0.10.2 numexpr-1.4.2 \
              pyfits-2.4.0 PyYAML-3.10 pycurl-7.19.0 urlgrabber-3.9.1 Polygon-2.0.2-mjuric-3 \
-             pywcs-1.10-4.7 matplotlib-1.0.1-mjuric scottransom-pyslalib-97cfc40
+             pywcs-1.10-4.7 matplotlib-1.1.0 scottransom-pyslalib-97cfc40
 PY_SPECIAL_PKGS:=scipy-0.9.0 numpy-1.6.1 distribute-0.6.19 tables-2.2.1 scikits.ann-0.2.dev-r803-mjuric-3 $(LSDPKG)
 
 #
@@ -49,7 +49,7 @@ tree:
 #
 lsd: $(LSDPKG) ipython-0.10.2
 	@
-matplotlib: ipython-0.10.2 matplotlib-1.0.1-mjuric
+matplotlib: ipython-0.10.2 matplotlib-1.1.0
 	@
 #
 # Cleanup
@@ -92,7 +92,7 @@ libssh2-1.2.8: openssl-1.0.0d
 ann_1.1.2-mjuric: swig-2.0.4
 pcre-8.12: zlib-1.2.5
 swig-2.0.4: pcre-8.12 zlib-1.2.5
-matplotlib-1.0.1-mjuric: scipy-0.9.0 freetype-2.4.6 libpng-1.4.8
+matplotlib-1.1.0: scipy-0.9.0 freetype-2.4.6 libpng-1.4.8
 
 ENV:=env -u PYTHONHOME PKG_CONFIG_PATH="$(DEST)/lib/pkgconfig:$$PKG_CONFIG_PATH" PATH=$(MODULES)/bin:$(DEST)/bin:$$PATH LD_LIBRARY_PATH=$(DEST)/lib:$$LD_LIBRARY_PATH PYTHONPATH=$(MODULES)/lib/python
 FLAGS=CFLAGS="-I$(DEST)/include" LDFLAGS="-L$(DEST)/lib"
