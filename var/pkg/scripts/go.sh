@@ -1,7 +1,6 @@
 #!/bin/bash
 
-#REMOTE="http://faun.rc.fas.harvard.edu/mjuric/lsd-setup/"
-REMOTE="http://nebel.rc.fas.harvard.edu/mjuric/lsd-setup/"
+REMOTE="http://research.majuric.org/lsd-setup/"
 DEFAULT_DEST="$HOME/lsd"
 
 # Create destination directory
