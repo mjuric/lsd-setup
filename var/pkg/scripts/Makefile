@@ -90,7 +90,7 @@ ifdef DOWNLOAD
 # Fetch LSD from github
 $(LSDPKG):
 	@echo -n "Downloading lsd-$(LSDVER) from GitHub ... " 1>&2
-	@wget -q -O - https://github.com/mjuric/lsd/archive/$(LSDVER).tar.gz | gunzip | bzip2 > $@.tmp && mv $@.tmp $@.tar.bz2
+	@wget -q https://github.com/mjuric/lsd/archive/$(LSDVER).tar.gz -O $@.tmp.gz && gunzip $@.tmp.gz && bzip2 $@.tmp && mv $@.tmp.bz2 $@.tar.bz2
 	@ echo "OK." 1>&2
 
 ../sources/%.tar.bz2:
