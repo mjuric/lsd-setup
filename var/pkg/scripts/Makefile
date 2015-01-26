@@ -5,7 +5,7 @@
 # `make' must be invoked from var/pkg/installed (for build/update)
 # or var/pkg/sources (for download)
 #
-LSDVER=anaconda-updates
+LSDVER?=0.6.0
 LSDPKG=lsd-$(LSDVER)
 
 SHELL:=/bin/bash
