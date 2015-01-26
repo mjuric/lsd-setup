@@ -1,7 +1,7 @@
 #!/bin/bash
 
-REMOTE="http://research.majuric.org/lsd-setup/"
-DEFAULT_DEST="$HOME/lsd"
+REMOTE=${LSDSETUP_REMOTE:-"http://research.majuric.org/lsd-setup/"}
+DEFAULT_DEST=${DEFAULT_DEST:-"$HOME/lsd"}
 
 # Create destination directory
 cat <<EOF
