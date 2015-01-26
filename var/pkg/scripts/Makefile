@@ -5,7 +5,8 @@
 # `make' must be invoked from var/pkg/installed (for build/update)
 # or var/pkg/sources (for download)
 #
-LSDPKG=lsd-0.5.5
+LSDVER=anaconda-updates
+LSDPKG=lsd-$(LSDVER)
 
 SHELL:=/bin/bash
 
@@ -18,20 +19,18 @@ MODULES:=$(DEST)/usr/local
 
 NCPU:=$(shell cat /proc/cpuinfo  | grep processor | wc |  awk '{print $$1}')
 
-all: lsd matplotlib
+all: lsd
 	@echo ...
 
-dlall: lsd matplotlib
+dlall: lsd
 	@echo ...
 
 #
 # List of all python packages that can be installed
 #
 
-PY_PACKAGES:=Cython-0.15 ipython-0.10.2 numexpr-1.4.2 \
-             pyfits-2.4.0 PyYAML-3.10 pycurl-7.19.0 urlgrabber-3.9.1 Polygon-2.0.2-mjuric-3 \
-             pywcs-1.10-4.7 matplotlib-1.1.0 scottransom-pyslalib-97cfc40
-PY_SPECIAL_PKGS:=scipy-0.9.0 numpy-1.6.1 distribute-0.6.19 tables-2.2.1 scikits.ann-0.2.dev-r803-mjuric-3 $(LSDPKG)
+PY_PACKAGES:=urlgrabber-3.9.1 Polygon-2.0.2-mjuric-3 scottransom-pyslalib-97cfc40
+PY_SPECIAL_PKGS:=scikits.ann-0.2.dev-r803-mjuric-3 $(LSDPKG)
 
 #
 # Create package tree
@@ -47,7 +46,7 @@ tree:
 #
 # Top-level packages and aliases
 #
-lsd: $(LSDPKG) ipython-0.10.2
+lsd: $(LSDPKG)
 	@
 matplotlib: ipython-0.10.2 matplotlib-1.1.0
 	@
@@ -69,30 +68,12 @@ gc:
 #
 # Software dependencies
 #
-$(LSDPKG): zlib-1.2.5 git-1.7.6 tables-2.2.1 pyfits-2.4.0 PyYAML-3.10 \
-        numpy-1.6.1 urlgrabber-3.9.1 Polygon-2.0.2-mjuric-3 \
-        scikits.ann-0.2.dev-r803-mjuric-3 scottransom-pyslalib-97cfc40 pywcs-1.10-4.7 \
-        scipy-0.9.0
-git-1.7.6: zlib-1.2.5
-Python-2.7.2: bzip2-1.0.6 readline-6.2 ncurses-5.9 gdbm-1.8.3 sqlite-autoconf-3070701 lzo-2.05 zlib-1.2.5 openssl-1.0.0d
-distribute-0.6.19 ipython-0.10.2 numpy-1.6.1 numexpr-1.4.2: Python-2.7.2
-Cython-0.15: numpy-1.6.1 Python-2.7.2
-tables-2.2.1: numpy-1.6.1 numexpr-1.4.2 Cython-0.15 hdf5-1.8.7 Python-2.7.2
-pyfits-2.4.0: numpy-1.6.1 Python-2.7.2
-PyYAML-3.10: numpy-1.6.1 Python-2.7.2
-pycurl-7.19.0: curl-7.21.7 Python-2.7.2
-urlgrabber-3.9.1: pycurl-7.19.0 Python-2.7.2
-Polygon-2.0.2-mjuric-3: numpy-1.6.1 Python-2.7.2
-scikits.ann-0.2.dev-r803-mjuric-3: ann_1.1.2-mjuric Python-2.7.2 distribute-0.6.19
-pywcs-1.10-4.7: numpy-1.6.1
-scipy-0.9.0: lapack-3.3.1-mjuric numpy-1.6.1
-numpy-1.6.1: lapack-3.3.1-mjuric Python-2.7.2
-curl-7.21.7: libssh2-1.2.8 zlib-1.2.5
-libssh2-1.2.8: openssl-1.0.0d
+$(LSDPKG): scikits.ann-0.2.dev-r803-mjuric-3 scottransom-pyslalib-97cfc40 Polygon-2.0.2-mjuric-3 urlgrabber-3.9.1 zlib-1.2.5
+
+scikits.ann-0.2.dev-r803-mjuric-3: ann_1.1.2-mjuric
 ann_1.1.2-mjuric: swig-2.0.4
-pcre-8.12: zlib-1.2.5
 swig-2.0.4: pcre-8.12 zlib-1.2.5
-matplotlib-1.1.0: scipy-0.9.0 freetype-2.4.6 libpng-1.4.8
+pcre-8.12: zlib-1.2.5
 
 ENV:=env -u PYTHONHOME PKG_CONFIG_PATH="$(DEST)/lib/pkgconfig:$$PKG_CONFIG_PATH" PATH=$(MODULES)/bin:$(DEST)/bin:$$PATH LD_LIBRARY_PATH=$(DEST)/lib:$$LD_LIBRARY_PATH PYTHONPATH=$(MODULES)/lib/python
 FLAGS=CFLAGS="-I$(DEST)/include" LDFLAGS="-L$(DEST)/lib"
@@ -105,6 +86,12 @@ CMD_PY_INSTALL=$(CMD_PYTHON) setup.py install --home=$(MODULES)
 
 ifdef DOWNLOAD
 .PRECIOUS: ../sources/%.tar.bz2
+
+# Fetch LSD from github
+$(LSDPKG):
+	@echo -n "Downloading lsd-$(LSDVER) from GitHub ... " 1>&2
+	@wget -q -O - https://github.com/mjuric/lsd/archive/$(LSDVER).tar.gz | gunzip | bzip2 > $@.tmp && mv $@.tmp $@.tar.bz2
+	@ echo "OK." 1>&2
 
 ../sources/%.tar.bz2:
 	@echo -n "Downloading $(shell basename $@ .tar.bz2) ... " 1>&2
