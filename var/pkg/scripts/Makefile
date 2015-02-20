@@ -5,7 +5,7 @@
 # `make' must be invoked from var/pkg/installed (for build/update)
 # or var/pkg/sources (for download)
 #
-LSDVER?=0.6.0
+LSDVER?=v0.6.0
 LSDPKG=lsd-$(LSDVER)
 
 SHELL:=/bin/bash
@@ -78,7 +78,7 @@ pcre-8.12: zlib-1.2.5
 ENV:=env -u PYTHONHOME PKG_CONFIG_PATH="$(DEST)/lib/pkgconfig:$$PKG_CONFIG_PATH" PATH=$(MODULES)/bin:$(DEST)/bin:$$PATH LD_LIBRARY_PATH=$(DEST)/lib:$$LD_LIBRARY_PATH PYTHONPATH=$(MODULES)/lib/python
 FLAGS=CFLAGS="-I$(DEST)/include" LDFLAGS="-L$(DEST)/lib"
 CMD_MAKE=$(ENV) $(MAKE)
-CMD_PREP=@(echo -n "Building $@ ... " 1>&2) && (cd $(BUILD) && rm -rf $@ && echo "$(INST)/$@.tar.bz2" && tar xjf $(INST)/$@.tar.bz2 && cd $@ && 
+CMD_PREP=@(echo -n "Building $@ ... " 1>&2) && (cd $(BUILD) && rm -rf $@ && echo "$(INST)/$@.tar.bz2" && tar xjf $(INST)/$@.tar.bz2 && cd $$(tar tjf $(INST)/$@.tar.bz2 | head -n 1 | cut -d '/' -f 1) && 
 CMD_CONF_MAKE_INSTALL=$(ENV) $(FLAGS) ./configure --prefix=$(DEST) && $(CMD_MAKE) -j$(NCPU) && $(CMD_MAKE) install
 CMD_LOG=) > $(INSTLOG)/$@.log 2>&1 && touch $@ && (echo done. 1>&2)
 CMD_PYTHON=$(ENV) python
